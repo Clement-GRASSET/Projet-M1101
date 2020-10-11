@@ -15,8 +15,9 @@ Les types de fichier possibles (cf les fichiers test fournis) sont :
 
 L'application doit être basée sur un fichier d'initialisation qui permet de spécifier les types à lister, avec un format à définir, comme par exemple :
 
-SVG:Scalable Vector Graphics:image
-MPEG:audio Monaural:son
+SVG:Scalable Vector Graphics:image  
+MPEG:audio Monaural:son  
+
 La sortie de l'application est la liste, pour chaque type, de la taille totale en megaoctets des fichiers de ce type, du nom, de la taille et du chemin du fichier de taille la plus grande de ce type, et de taille la plus petite. Si des fichiers ont une extension qui ne correspond pas à leur type, il faut les lister (soupçon de fraude).
 
 Les fichiers archive doivent être détectés et parcourus comme des répertoires, i.e. on liste également leurs tailles dans les autres types. Si on y trouve un fichier audio mp3, sa taille est ajoutée à la taille des fichiers mp3 globale par exemple.
