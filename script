@@ -1,0 +1,20 @@
+#!/bin/bash
+
+testFile=./README.md
+
+# Obtenir le type d'un fichier
+getFileType()
+{
+    fileType=`file $1`
+    echo $fileType
+}
+
+# Obtenir la taille d'un fichier
+getFileSize()
+{
+    fileSize=`wc -c $1`
+    echo $fileSize
+}
+
+getFileType $testFile
+getFileSize $testFile
