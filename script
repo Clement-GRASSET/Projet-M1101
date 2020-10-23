@@ -1,20 +1,54 @@
 #!/bin/bash
 
-testFile=./README.md
-
 # Obtenir le type d'un fichier
 getFileType()
 {
-    fileType=`file $1`
+    fileType=`file $1 | cut -d ':' -f 2`
     echo $fileType
 }
 
 # Obtenir la taille d'un fichier
 getFileSize()
 {
-    fileSize=`wc -c $1`
+    fileSize=`wc -c $1 | cut -d ' ' -f 1`
     echo $fileSize
 }
 
-getFileType $testFile
-getFileSize $testFile
+# liste dans ./temp/fileList.txt tous les fichiers d'un répertoire et ses sous répertoires
+MakeFileListFolder()
+{
+    folder=$1
+    `find $1 -type f > fileList`
+}
+
+
+# Début du programme
+
+
+# Définition du dossier de recherche
+case $# in
+    # Aucun parametre pour le script : on utilise ./ comme dossier de recherche
+    0) 
+        echo "Aucun dossier de recherche défini en parametre,"
+        folder=./
+    ;;
+    # Un parametre : si c'est un dossier, on vérifie si il existe et on l'utilise comme dossier de recherche
+    1) 
+        folder=$1
+        # On vérifie si le dossier existe. Si il n'existe pas, on sort du ptogramme
+        if [ ! -d "$folder" ]
+            then
+                echo "Le dossier $folder n'existe pas"
+                exit
+        fi
+    ;;
+    # Plusieurs paramètres
+    *) 
+        echo "Les paramètres donnés sont invalides, sortie du programme"
+        exit
+    ;;
+esac
+echo "Recherche de fichiers à partir de $folder"
+
+
+MakeFileListFolder $folder
