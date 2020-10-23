@@ -1,24 +1,59 @@
 #!/bin/bash
 
+# Définition des constantes
+TMP=./tmp
+FILE_LIST=$TMP/fileList
+ARCHIVE_FOLDER=$TMP/archives
+
 # Obtenir le type d'un fichier
 getFileType()
 {
-    fileType=`file $1 | cut -d ':' -f 2`
-    echo $fileType
+    getFileType_fileType=`file $1 | cut -d ':' -f 2`
+    echo $getFileType_fileType
 }
 
 # Obtenir la taille d'un fichier
 getFileSize()
 {
-    fileSize=`wc -c $1 | cut -d ' ' -f 1`
-    echo $fileSize
+    getFileSize_fileSize=`wc -c $1 | cut -d ' ' -f 1`
+    echo $getFileSize_fileSize
+}
+
+# Renvoie le nom d'un fichier sans le chemin de son dossier
+getFileName()
+{
+    getFileName_path=$1
+    basename $getFileName_path
+}
+
+# Crée un dossier et les dossiers parents si besoin
+createFolder()
+{
+    createFolder_folder=$1
+    if [ ! -d $createFolder_folder ]
+        then
+            mkdir -p $createFolder_folder
+    fi
 }
 
 # liste dans ./temp/fileList.txt tous les fichiers d'un répertoire et ses sous répertoires
-MakeFileListFolder()
+makeFileList()
 {
-    folder=$1
-    `find $1 -type f > fileList`
+    makeFileList_folder=$1
+    `find $makeFileList_folder -type f > $FILE_LIST`
+}
+
+# Extrait une archive dans un dossier
+extract()
+{
+    extract_archive=$1
+    extract_destination=$2
+    extract_fileName=`getFileName $extract_archive`
+    echo "Nom du fichier : "$extract_fileName
+    createFolder $extract_destination/$extract_archive
+    cp $extract_archive $extract_destination/$extract_archive
+    echo $extract_destination/$extract_archive/$extract_fileName
+    tar -x $extract_destination/$extract_archive -f $extract_fileName
 }
 
 
@@ -50,5 +85,15 @@ case $# in
 esac
 echo "Recherche de fichiers à partir de $folder"
 
+# Creation des dossiers tmp et archives
+#mkdir $TMP
+#mkdir $ARCHIVE_FOLDER
+createFolder $TMP
+createFolder $ARCHIVE_FOLDER
 
-MakeFileListFolder $folder
+makeFileList $folder
+
+extract ./repTest/rep2/archive2.tar.gz $ARCHIVE_FOLDER
+
+# Suppression du dossier tmp
+#rm -r ./tmp
