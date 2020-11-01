@@ -1,0 +1,139 @@
+#!/bin/bash
+
+#créé un fichier qui contient les infos nécéssaires pour tout les fichiers du répertoire
+`ls -l > FileList`
+
+#compteurs des boucles
+nomc=0
+taillec=0
+datec=0
+heurec=0
+c=0
+
+#nombre de fichiers
+nbFiles=`wc -l FileList | cut -d ' ' -f1`
+nbFiles=`expr $nbFiles - 2`
+
+#parcours 
+while [ $c -le $nbFiles ]
+    do
+        c=`expr $c +1`
+
+#nom
+        for nom in `ls -l`
+            do 
+                nomc=`expr $nomc + 1`
+
+                #nc permet de comparer en fonction de c ième fichier
+                nc=`expr $c \* 9 +2`
+
+                if [ $nomc -eq $nc ]
+                    then
+
+                    #nomf suavegarde le nom
+                        nomf=$nom
+# test                       echo "Le nom du fichier est : $nom"
+                fi
+        done
+
+#taille
+        for taille in `ls -l`
+            do
+                taillec=`expr $taillec + 1`
+
+                #tc permet de comparer en fonction de c ième fichier
+                tc=`expr $c \* 4 + 3`
+
+                if [ $taillec -eq $tc ]
+                    then
+                        restaille=`echo "scale=6;($taille/1000000)" | bc -l`
+                        #restaillef sauvegarde la taille convertie en Mo avec 6 chiffres après la virgule
+                        restaillef=$restaille
+# test                      echo "La taille est de 0$restaille Mo"
+                fi
+        done
+
+#date de création
+        for date in `ls -l`
+            do
+                datec=`expr $date + 1`
+
+                #dc et dc2 permettent de comparer en réunissant jour et moi en fonction de c ième fichier
+                dc=`expr $c \* 5 + 3`
+                dc2=`expr $c \* 6 + 3`
+
+                if [ $datec -eq $dc ]
+                    then
+                        d=$date
+                fi
+
+                if [ $datec -eq $dc2 ]
+                    then
+                        date="$date $d"
+
+                        #datef sauvegarde l'heure
+                        datef=$date
+#test                        echo "Le fichier à été créé le $date"
+                fi
+        done
+
+#heure de création
+        for heure in `ls -l`
+            do
+                heurec=`expr $heurec + 1`
+
+                #tc permet de comparer en fonction de c ième fichier
+                hc=`expr $c \* 7 + 3`
+
+                if [ $heurec -eq $hc ]
+                    then
+                    
+                    #heuref sauvegarde l'heure
+                        heuref=$heure
+#test                        echo "Le fichier à été créé à $heure"
+                fi
+        done
+
+        echo "Le fichier $nomf, de taille 0$restaillef Mo, à été créé le $datef à $heuref"
+done
+
+#=======================================================================================================================================================#
+
+#compteur
+cdiff=1
+
+#même fonction que la boucle pour en C++
+while [ $cdiff -le $nbFiles ]
+    do
+
+#définition de la taille max et min peut importe les valeurs min et max possibles
+        if [ $cdiff -eq 1 ]
+            then
+                taillemin=$taille
+                taillemax=$taille
+        fi
+
+#affectation des valeurs du fichier ayant le taille la plus grande
+        if [ $taillemax -le $taille ]
+            then
+                taillemax=$taille
+                nommax=$nom
+                datemax=$date
+                heuremax=$heure
+        fi
+
+#affectation des valeurs du fichier ayant la taille la plus petite
+        if [ $taille -le $taillemin ]
+            then
+                taillemin=$taille
+                nommin=$nom
+                datemin=$date
+                heuremin=$heure
+        fi
+
+#incrémentation
+        cdiff=`expr $cdiff + 1`
+done
+
+echo "Les informations sur le fichier ayant la tailles la plus petite sont : taille=$taillemin; date=$datemin; nom=$nommin; heure=$heuremin"
+echo "Les informations sur le fichier ayant la tailles la plus grande sont : taille=$taillemax; date=$datemax; nom=$nommax; heure=$heuremax"
