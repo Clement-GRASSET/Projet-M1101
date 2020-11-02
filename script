@@ -1,59 +1,66 @@
 #!/bin/bash
 
 # Définition des constantes
-TMP=./tmp
-FILE_LIST=$TMP/fileList
-ARCHIVE_FOLDER=$TMP/archives
+TMP=./tmp                           # Chemin du repertoire temporaire
+FILE_LIST=$TMP/fileList             # Chemin du fichier qui va contenir la liste des fichiers à traiter
+ARCHIVE_FOLDER=$TMP/archives        # Chemin du répertoire temporaire où vont être stockée les archives
 
-# Obtenir le type d'un fichier
+# Renvoie le type d'un fichier
 getFileType()
 {
-    getFileType_fileType=`file $1 | cut -d ':' -f 2`
-    echo $getFileType_fileType
+    local file=$1
+    local fileType=`file $file | cut -d ':' -f 2`
+    echo $fileType
 }
 
-# Obtenir la taille d'un fichier
+# Renvoie la taille d'un fichier
 getFileSize()
 {
-    getFileSize_fileSize=`wc -c $1 | cut -d ' ' -f 1`
-    echo $getFileSize_fileSize
+    local file=$1
+    local fileSize=`wc -c $file | cut -d ' ' -f 1`
+    echo $fileSize
 }
 
 # Renvoie le nom d'un fichier sans le chemin de son dossier
 getFileName()
 {
-    getFileName_path=$1
-    basename $getFileName_path
+    local path=$1
+    local fileName=`basename $getFileName_path`
+    echo $fileName
 }
 
 # Crée un dossier et les dossiers parents si besoin
 createFolder()
 {
-    createFolder_folder=$1
-    if [ ! -d $createFolder_folder ]
+    local folder=$1
+    if [ ! -d $folder ]
         then
-            mkdir -p $createFolder_folder
+            mkdir -p $folder
     fi
 }
 
 # liste dans ./temp/fileList.txt tous les fichiers d'un répertoire et ses sous répertoires
 makeFileList()
 {
-    makeFileList_folder=$1
-    `find $makeFileList_folder -type f > $FILE_LIST`
+    local folder=$1
+    `find $folder -type f >> $FILE_LIST`
 }
 
 # Extrait une archive dans un dossier
-extract()
+extractFile()
 {
-    extract_archive=$1
-    extract_destination=$2
-    extract_fileName=`getFileName $extract_archive`
-    echo "Nom du fichier : "$extract_fileName
-    createFolder $extract_destination/$extract_archive
-    cp $extract_archive $extract_destination/$extract_archive
-    echo $extract_destination/$extract_archive/$extract_fileName
-    tar -x $extract_destination/$extract_archive -f $extract_fileName
+    local archive=$1
+    local destination=$2
+    tar -xf $archive -C $destination
+}
+
+# extrait une archive vers le dossier temporaire en créant un répertoire unique
+extractFileToTmp()
+{
+    local archive=$1
+    local destination=$ARCHIVE_FOLDER/$archive
+    createFolder $destination
+    extractFile $archive $destination
 }
 
 
@@ -84,16 +91,19 @@ case $# in
     ;;
 esac
 echo "Recherche de fichiers à partir de $folder"
+echo ""
 
 # Creation des dossiers tmp et archives
-#mkdir $TMP
-#mkdir $ARCHIVE_FOLDER
 createFolder $TMP
 createFolder $ARCHIVE_FOLDER
 
 makeFileList $folder
 
-extract ./repTest/rep2/archive2.tar.gz $ARCHIVE_FOLDER
+extractFileToTmp ./repTest/rep2/archive2.tar.gz
+
+makeFileList $ARCHIVE_FOLDER
+
+
 
 # Suppression du dossier tmp
 #rm -r ./tmp
