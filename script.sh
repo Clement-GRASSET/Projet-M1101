@@ -67,7 +67,7 @@ extractFileToTmp()
     extractFile $archive $destination
 }
 
-# Renvoie la gatégorie d'un fichier en fonction de son type
+# Renvoie la catégorie d'un fichier en fonction de son type
 getCategory()
 {
     local file=$1
