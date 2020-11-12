@@ -1,5 +1,7 @@
 #!/bin/bash
 
+IFS=$'\n'
+
 # Définition des constantes
 TMP=./tmp                           # Chemin du repertoire temporaire
 FILE_LIST=$TMP/fileList             # Chemin du fichier qui va contenir la liste des fichiers à traiter
@@ -69,7 +71,7 @@ extractFileToTmp()
 getCategory()
 {
     local file=$1
-    IFS=$'\n'
+
     if [ $(getFileType $file) = " data" ]
         then
             echo "data"
@@ -86,10 +88,16 @@ getCategory()
                     exit
             fi
     done
-    IFS=$' '
+
     echo "divers"
 }
 
+# Converti des octets en megaoctets
+ByteToMegabyte()
+{
+    local size=$1
+    printf "%.2f" "$(($size))e-6"
+}
 
 # Début du programme
 
@@ -151,5 +159,21 @@ for file in `cat $FILE_LIST`
         echo $file >> $CATEGORIES/$fileCategory
 done
 
+for category in `ls $CATEGORIES`
+    do
+        totalSize=0
+        for file in `cat $CATEGORIES/$category`
+            do 
+                fileSize=`getFileSize $file`
+                totalSize=`expr $totalSize + $fileSize`
+        done
+        echo $category" :"
+        echo "Taille totale : "`ByteToMegabyte $totalSize`" Mo"
+        echo ""
+done
+
 # Suppression du dossier tmp
 #rm -r $TMP
+
+
+IFS=$' '
