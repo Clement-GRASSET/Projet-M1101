@@ -22,12 +22,12 @@ getFileSize()
 }
 
 # Renvoie le nom d'un fichier sans le chemin de son dossier
-getFileName()
-{
-    local path=$1
-    local fileName=`basename $getFileName_path`
-    echo $fileName
-}
+#getFileName()
+# {
+#    local path=$1
+#    local fileName=basename $path
+#    echo $fileName
+# }
 
 # Crée un dossier et les dossiers parents si besoin
 createFolder()
@@ -51,7 +51,7 @@ extractFile()
 {
     local archive=$1
     local destination=$2
-    tar -xf $archive -C $destination
+    tar -xf $archive -C $destination 2>/dev/null
 }
 
 # extrait une archive vers le dossier temporaire en créant un répertoire unique
@@ -66,6 +66,11 @@ extractFileToTmp()
 
 # Début du programme
 
+# Suppression de la liste des fichiers si elle existe déja
+if [ -f $FILE_LIST ]
+    then 
+        rm $FILE_LIST
+fi
 
 # Définition du dossier de recherche
 case $# in
@@ -99,7 +104,12 @@ createFolder $ARCHIVE_FOLDER
 
 makeFileList $folder
 
-extractFileToTmp ./repTest/rep2/archive2.tar.gz
+
+for file in `cat $FILE_LIST`
+    do 
+        extractFileToTmp $file && echo $file" extrait"
+done
+
 
 makeFileList $ARCHIVE_FOLDER
 
