@@ -3,7 +3,9 @@
 # Définition des constantes
 TMP=./tmp                           # Chemin du repertoire temporaire
 FILE_LIST=$TMP/fileList             # Chemin du fichier qui va contenir la liste des fichiers à traiter
+CATEGORIES=$TMP/categories          # Chemin du répertoire contenant les listes des fichiers par categories
 ARCHIVE_FOLDER=$TMP/archives        # Chemin du répertoire temporaire où vont être stockée les archives
+INIT_FILE=./init.txt                # Chemin du fichier d'initialisation
 
 # Renvoie le type d'un fichier
 getFileType()
@@ -63,6 +65,31 @@ extractFileToTmp()
     extractFile $archive $destination
 }
 
+# Renvoie la gatégorie d'un fichier en fonction de son type
+getCategory()
+{
+    local file=$1
+    IFS=$'\n'
+    if [ $(getFileType $file) = " data" ]
+        then
+            echo "data"
+            exit
+    fi
+    for line in `cat $INIT_FILE`
+        do 
+            local type=`echo $line | cut -d ':' -f 2`
+            local category=`echo $line | cut -d ':' -f 3`
+            local result=`getFileType $file | grep -c $type`
+            if [ $result -ne 0 ]
+                then
+                    echo $category
+                    exit
+            fi
+    done
+    IFS=$' '
+    echo "divers"
+}
+
 
 # Début du programme
 
@@ -70,6 +97,12 @@ extractFileToTmp()
 if [ -f $FILE_LIST ]
     then 
         rm $FILE_LIST
+fi
+
+# Suppression du répertoire categories si il existe déja
+if [ -d $CATEGORIES ]
+    then 
+        rm -r $CATEGORIES
 fi
 
 # Définition du dossier de recherche
@@ -100,20 +133,23 @@ echo ""
 
 # Creation des dossiers tmp et archives
 createFolder $TMP
+createFolder $CATEGORIES
 createFolder $ARCHIVE_FOLDER
 
 makeFileList $folder
 
-
 for file in `cat $FILE_LIST`
     do 
-        extractFileToTmp $file && echo $file" extrait"
+        extractFileToTmp $file
 done
-
 
 makeFileList $ARCHIVE_FOLDER
 
-
+for file in `cat $FILE_LIST`
+    do 
+        fileCategory=`getCategory $file`
+        echo $file >> $CATEGORIES/$fileCategory
+done
 
 # Suppression du dossier tmp
-#rm -r ./tmp
+#rm -r $TMP

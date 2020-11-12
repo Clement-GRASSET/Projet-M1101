@@ -1,0 +1,2 @@
+SVG:Scalable Vector Graphics:image
+MP3:Monaural:son
