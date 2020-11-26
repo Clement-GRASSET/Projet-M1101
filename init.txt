@@ -1,2 +1,3 @@
 SVG:Scalable Vector Graphics:image
 MP3:Monaural:son
+GIF:GIF image data:image
