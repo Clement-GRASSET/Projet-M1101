@@ -8,7 +8,7 @@ ODT:OpenDocument Text:document
 MP4:MP4 Base Media:video
 BLEND:Blender3D:image
 PNG:PNG image data:image
-MP3:data:son     (c est la mouette et je suis pas sure si il faut faire ça)
+MP3:data:son
 TXT:UTF-8 Unicode text:texte
 PDF:PDF document:document
 MD:ASCII text:texte
@@ -16,4 +16,3 @@ HTML:HTML document, ASCII text:document
 MP3:Stereo:son
 TAR.GZ:gzip compressed data:archive
 XLSX:Microsoft Excel:document
-MP3:data:son
