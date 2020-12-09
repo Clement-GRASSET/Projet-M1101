@@ -25,14 +25,6 @@ getFileSize()
     echo $fileSize
 }
 
-# Renvoie le nom d'un fichier sans le chemin de son dossier
-#getFileName()
-# {
-#    local path=$1
-#    local fileName=basename $path
-#    echo $fileName
-# }
-
 # Crée un dossier et les dossiers parents si besoin
 createFolder()
 {
@@ -162,13 +154,39 @@ done
 for category in `ls $CATEGORIES`
     do
         totalSize=0
+        plusGros=""
+        plusPetit=""
         for file in `cat $CATEGORIES/$category`
             do 
                 fileSize=`getFileSize $file`
+                if [[ -f $plusGros ]]
+                    then
+                        if [ `getFileSize $plusGros` -le $fileSize ]
+                            then
+                                plusGros=$file
+                        fi
+                else
+                        plusGros=$file
+                fi
+                if [[ -f $plusPetit ]]
+                    then
+                        if [ `getFileSize $plusPetit` -ge $fileSize ]
+                            then
+                                plusPetit=$file
+                        fi
+                else
+                        plusPetit=$file
+                fi
                 totalSize=`expr $totalSize + $fileSize`
         done
         echo $category" :"
+        taillePlusPetit=`getFileSize $plusPetit`
+        taillePlusPetit=`ByteToMegabyte $taillePlusPetit`
+        taillePlusGros=`getFileSize $plusGros`
+        taillePlusGros=`ByteToMegabyte $taillePlusGros`
         echo "Taille totale : "`ByteToMegabyte $totalSize`" Mo"
+        echo -e "Plus petit fichier \t"`basename $plusPetit`" ("$taillePlusPetit" Mo) \t"$plusPetit
+        echo -e "Plus gros fichier \t"`basename $plusGros`" ("$taillePlusGros" Mo) \t"$plusGros
         echo ""
 done
 
