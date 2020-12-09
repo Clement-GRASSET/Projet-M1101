@@ -25,13 +25,19 @@ getFileSize()
     echo $fileSize
 }
 
+getFileExtension()
+{
+    local fileName=`basename $1`
+    echo "${fileName#*.}"
+}
+
 # Crée un dossier et les dossiers parents si besoin
 createFolder()
 {
     local folder=$1
     if [ ! -d $folder ]
-        then
-            mkdir -p $folder
+    then
+        mkdir -p $folder
     fi
 }
 
@@ -65,20 +71,20 @@ getCategory()
     local file=$1
 
     if [ $(getFileType $file) = " data" ]
-        then
-            echo "data"
-            exit
+    then
+        echo "data"
+        exit
     fi
     for line in `cat $INIT_FILE`
-        do 
-            local type=`echo $line | cut -d ':' -f 2`
-            local category=`echo $line | cut -d ':' -f 3`
-            local result=`getFileType $file | grep -c $type`
-            if [ $result -ne 0 ]
-                then
-                    echo $category
-                    exit
-            fi
+    do 
+        local type=`echo $line | cut -d ':' -f 2`
+        local category=`echo $line | cut -d ':' -f 3`
+        local result=`getFileType $file | grep -c $type`
+        if [ $result -ne 0 ]
+            then
+                echo $category
+                exit
+        fi
     done
 
     echo "divers"
@@ -91,18 +97,44 @@ ByteToMegabyte()
     printf "%.2f" "$(($size))e-6"
 }
 
+# Remplace des caractères minuscules en majuscule
+ToUppercase()
+{
+    echo $1 | tr [a-z] [A-Z]
+}
+
+isValidExtension()
+{
+    local file=$1
+    local category=$2
+    local isValid=false
+    for line in `cat $INIT_FILE`
+    do
+        if [ $category = `echo $line | cut -d ':' -f 3` ]
+        then
+            extension=`echo $line | cut -d ':' -f 1`
+
+            if [ `ToUppercase $file | grep -c ".$extension"` -eq 1 ]
+            then
+                isValid=true
+            fi
+        fi
+    done
+    echo $isValid
+}
+
 # Début du programme
 
 # Suppression de la liste des fichiers si elle existe déja
 if [ -f $FILE_LIST ]
-    then 
-        rm $FILE_LIST
+then 
+    rm $FILE_LIST
 fi
 
 # Suppression du répertoire categories si il existe déja
 if [ -d $CATEGORIES ]
-    then 
-        rm -r $CATEGORIES
+then 
+    rm -r $CATEGORIES
 fi
 
 # Définition du dossier de recherche
@@ -117,9 +149,9 @@ case $# in
         folder=$1
         # On vérifie si le dossier existe. Si il n'existe pas, on sort du ptogramme
         if [ ! -d "$folder" ]
-            then
-                echo "Le dossier $folder n'existe pas"
-                exit
+        then
+            echo "Le dossier $folder n'existe pas"
+            exit
         fi
     ;;
     # Plusieurs paramètres
@@ -139,55 +171,70 @@ createFolder $ARCHIVE_FOLDER
 makeFileList $folder
 
 for file in `cat $FILE_LIST`
-    do 
-        extractFileToTmp $file
+do 
+    extractFileToTmp $file
 done
 
 makeFileList $ARCHIVE_FOLDER
 
 for file in `cat $FILE_LIST`
-    do 
-        fileCategory=`getCategory $file`
-        echo $file >> $CATEGORIES/$fileCategory
+do 
+    fileCategory=`getCategory $file`
+    echo $file >> $CATEGORIES/$fileCategory
 done
 
 for category in `ls $CATEGORIES`
+do
+    totalSize=0
+    plusGros=""
+    plusPetit=""
+    mauvaiseExtension=()
+    for file in `cat $CATEGORIES/$category`
+    do 
+        fileSize=`getFileSize $file`
+        if [[ -f $plusGros ]]
+        then
+            if [ `getFileSize $plusGros` -le $fileSize ]
+            then
+                plusGros=$file
+            fi
+        else
+                plusGros=$file
+        fi
+        if [[ -f $plusPetit ]]
+        then
+            if [ `getFileSize $plusPetit` -ge $fileSize ]
+            then
+                plusPetit=$file
+            fi
+        else
+            plusPetit=$file
+        fi
+        totalSize=`expr $totalSize + $fileSize`
+
+        if [ `isValidExtension $file $category` = false ]
+        then
+            mauvaiseExtension+=($file)
+        fi
+        #isValidExtension $file $category
+        
+    done
+
+    echo $category" :"
+    taillePlusPetit=`getFileSize $plusPetit`
+    taillePlusPetit=`ByteToMegabyte $taillePlusPetit`
+    taillePlusGros=`getFileSize $plusGros`
+    taillePlusGros=`ByteToMegabyte $taillePlusGros`
+    echo "Taille totale : "`ByteToMegabyte $totalSize`" Mo"
+    echo -e "Plus petit fichier  : \t"`basename $plusPetit`" ("$taillePlusPetit" Mo) \t"$plusPetit
+    echo -e "Plus gros fichier   : \t"`basename $plusGros`" ("$taillePlusGros" Mo) \t"$plusGros
+
+    for file in "${mauvaiseExtension[@]}"
     do
-        totalSize=0
-        plusGros=""
-        plusPetit=""
-        for file in `cat $CATEGORIES/$category`
-            do 
-                fileSize=`getFileSize $file`
-                if [[ -f $plusGros ]]
-                    then
-                        if [ `getFileSize $plusGros` -le $fileSize ]
-                            then
-                                plusGros=$file
-                        fi
-                else
-                        plusGros=$file
-                fi
-                if [[ -f $plusPetit ]]
-                    then
-                        if [ `getFileSize $plusPetit` -ge $fileSize ]
-                            then
-                                plusPetit=$file
-                        fi
-                else
-                        plusPetit=$file
-                fi
-                totalSize=`expr $totalSize + $fileSize`
-        done
-        echo $category" :"
-        taillePlusPetit=`getFileSize $plusPetit`
-        taillePlusPetit=`ByteToMegabyte $taillePlusPetit`
-        taillePlusGros=`getFileSize $plusGros`
-        taillePlusGros=`ByteToMegabyte $taillePlusGros`
-        echo "Taille totale : "`ByteToMegabyte $totalSize`" Mo"
-        echo -e "Plus petit fichier \t"`basename $plusPetit`" ("$taillePlusPetit" Mo) \t"$plusPetit
-        echo -e "Plus gros fichier \t"`basename $plusGros`" ("$taillePlusGros" Mo) \t"$plusGros
-        echo ""
+        echo `basename $file`" n'a pas la bonne extension"
+    done
+
+    echo ""
 done
 
 # Suppression du dossier tmp
