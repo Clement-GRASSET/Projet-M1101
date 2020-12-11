@@ -3,17 +3,17 @@ GIF:GIF image data:image
 JPG:JPEG image data:image
 BLEND:Blender3D:image
 PNG:PNG image data:image
-MP3:Monaural:son
-MP3:Stereo:son
+MP3:MPEG ADTS:son
 MP3:Audio file with ID3:son
-MP4:MP4 Base Media:video
+MP4:iso Media:video
 TXT:ASCII text:texte
 TXT:UTF-8 Unicode text:texte
 MD:ASCII text:texte
 RTF: Rich Text Format data:document
 ODT:OpenDocument Text:document
+RTF:Rich Text Format data:document
 PDF:PDF document:document
-HTML:HTML document, ASCII text:document
+HTML:HTML document:document
 XLSX:Microsoft Excel:document
 TAR.GZ:gzip compressed data:archive
 

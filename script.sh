@@ -13,8 +13,8 @@ INIT_FILE=./init.txt                # Chemin du fichier d'initialisation
 getFileType()
 {
     local file=$1
-    local fileType=`file $file | cut -d ':' -f 2`
-    echo $fileType
+    local fileType=`file -b $file | cut -d ',' -f 1`
+    echo `Uppercase $fileType`
 }
 
 # Renvoie la taille d'un fichier
@@ -70,7 +70,7 @@ getCategory()
 {
     local file=$1
 
-    if [ $(getFileType $file) = " data" ]
+    if [ $(getFileType $file) = "DATA" ]
     then
         echo "data"
         exit
@@ -78,6 +78,7 @@ getCategory()
     for line in `cat $INIT_FILE`
     do 
         local type=`echo $line | cut -d ':' -f 2`
+        local type=`Uppercase $type`
         local category=`echo $line | cut -d ':' -f 3`
         local result=`getFileType $file | grep -c $type`
         if [ $result -ne 0 ]
@@ -98,9 +99,10 @@ ByteToMegabyte()
 }
 
 # Remplace des caractères minuscules en majuscule
-ToUppercase()
+Uppercase()
 {
-    echo $1 | tr [a-z] [A-Z]
+    local text=$1
+    echo $text | tr [a-z] [A-Z]
 }
 
 isValidExtension()
@@ -114,7 +116,7 @@ isValidExtension()
         then
             extension=`echo $line | cut -d ':' -f 1`
 
-            if [ `ToUppercase $file | grep -c ".$extension"` -eq 1 ]
+            if [ `Uppercase $file | grep -c ".$extension"` -eq 1 ]
             then
                 isValid=true
             fi
@@ -212,11 +214,11 @@ do
         fi
         totalSize=`expr $totalSize + $fileSize`
 
-        if [ `isValidExtension $file $category` = false ]
+        # On vérifie si le fichier a la bonne extension, saut s'il appartient à la catégorie "data" ou "divers"
+        if [ `isValidExtension $file $category` = false ] && [ $category != "data" ] && [ $category != "divers" ]
         then
             mauvaiseExtension+=($file)
         fi
-        #isValidExtension $file $category
         
     done
 
@@ -239,6 +241,5 @@ done
 
 # Suppression du dossier tmp
 #rm -r $TMP
-
 
 IFS=$' '
