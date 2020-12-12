@@ -22,6 +22,6 @@ La sortie de l'application est la liste, pour chaque type, de la taille totale e
 
 Les fichiers archive doivent être détectés et parcourus comme des répertoires, i.e. on liste également leurs tailles dans les autres types. Si on y trouve un fichier audio mp3, sa taille est ajoutée à la taille des fichiers mp3 globale par exemple.
 
-Attention, ne vous fiez pas aux noms ou aux extensions des fichiers. Certains fichiers ne seront pas reconnus (data), il faudra des catégories "divers", "data" supplémentaires.
+Attention, ne vous fiez pas aux noms ou aux extensions des fichiers. Certains fichiers ne seront pas reconnus (data), il faudra des catégories "divers", pour ces "data" supplémentaires.
 
 Vous pouvez apporter des ajouts aux points précédents (sortie en HTML, test date et heure...) mais ils ne seront notés en bonus que si les points obligatoires sont remplis.
