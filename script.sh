@@ -98,27 +98,32 @@ ByteToMegabyte()
     printf "%.2f" "$(($size))e-6"
 }
 
-# Remplace des caractères minuscules en majuscule
+# Remplace les caractères minuscules par leur version en majuscule
 Uppercase()
 {
     local text=$1
     echo $text | tr [a-z] [A-Z]
 }
 
+# Vérifie si l'extension d'un fichier correspond a son type renvoyé par file
 isValidExtension()
 {
     local file=$1
-    local category=$2
-    local isValid=false
+    local isValid=false     # La condition qui détermine si l'extension est valide
+
+    # On vérifie pour chaque ligne du fichier d'initialisation si le type donné dans la ligne correspond au type du fichier testé
     for line in `cat $INIT_FILE`
     do
-        if [ $category = `echo $line | cut -d ':' -f 3` ]
+        local fileType=`getFileType $file`                      # Le type du fichier testé
+        local checkType=`Uppercase $line | cut -d ':' -f 2`     # Le type associé à la ligne du fichier d'initialisation testé
+        if [ `echo $fileType | grep -c $checkType` -ge 1 ]
         then
-            extension=`echo $line | cut -d ':' -f 1`
+            extension=`echo $line | cut -d ':' -f 1`    # L'extension associée à la ligne du fichier d'initialisation testé
 
+            # On teste si l'extension du fichier correspond à l'extension présente dans la ligne
             if [ `Uppercase $file | grep -c ".$extension"` -eq 1 ]
             then
-                isValid=true
+                isValid=true    # Les types et extensions correspondent, donc le l'extension est valide
             fi
         fi
     done
@@ -194,6 +199,8 @@ do
     for file in `cat $CATEGORIES/$category`
     do 
         fileSize=`getFileSize $file`
+
+        # Vérifie si le fichier est le plus grand
         if [[ -f $plusGros ]]
         then
             if [ `getFileSize $plusGros` -le $fileSize ]
@@ -201,8 +208,10 @@ do
                 plusGros=$file
             fi
         else
-                plusGros=$file
+            plusGros=$file
         fi
+
+        # Vérifie si le fichier est le plus petit
         if [[ -f $plusPetit ]]
         then
             if [ `getFileSize $plusPetit` -ge $fileSize ]
@@ -212,10 +221,11 @@ do
         else
             plusPetit=$file
         fi
+
         totalSize=`expr $totalSize + $fileSize`
 
         # On vérifie si le fichier a la bonne extension, saut s'il appartient à la catégorie "data" ou "divers"
-        if [ `isValidExtension $file $category` = false ] && [ $category != "data" ] && [ $category != "divers" ]
+        if [ `isValidExtension $file` = false ] && [ $category != "data" ] && [ $category != "divers" ]
         then
             mauvaiseExtension+=($file)
         fi
@@ -233,7 +243,7 @@ do
 
     for file in "${mauvaiseExtension[@]}"
     do
-        echo `basename $file`" n'a pas la bonne extension"
+        echo `basename $file`" n'a pas la bonne extension    ("$file")"
     done
 
     echo ""
