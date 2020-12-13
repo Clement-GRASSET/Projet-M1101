@@ -132,16 +132,12 @@ isValidExtension()
 
 # Début du programme
 
-# Suppression de la liste des fichiers si elle existe déja
-if [ -f $FILE_LIST ]
+# Vérification de l'existance de ./tmp
+if [ -d $TMP ]
 then 
-    rm $FILE_LIST
-fi
-
-# Suppression du répertoire categories si il existe déja
-if [ -d $CATEGORIES ]
-then 
-    rm -r $CATEGORIES
+    echo "./tmp existe déja, supprimez le répertoire et réessayez"
+    echo ""
+    exit
 fi
 
 # Définition du dossier de recherche
@@ -249,7 +245,7 @@ do
     echo ""
 done
 
-# Suppression du dossier tmp
-#rm -r $TMP
+# Suppression du répertoire tmp
+rm -r $TMP
 
 IFS=$' '
