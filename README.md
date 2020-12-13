@@ -1,7 +1,9 @@
 # Projet-M1101
 
 BARTHET-ECOFFARD Léo
+
 DOS SANTOS Enzo
+
 GRASSET Clément
 
 ## Sujet
@@ -42,6 +44,18 @@ Utilisation :
 
 Les appels du script qui fournissent autre chose qu'un répertoire en paramètre ou plus d'un paramètre causeront la fin de l'execution du script (géré dans les lignes 147 à 171)
 
+### Le répertoire ./tmp
+
+Les données traitées par le script sont stockées dans le répertoire ./tmp
+
+./tmp/fileList contient la liste des fichiers détectés dans le répertoire spécifié et des fichiers présents dans les archives.
+
+./tmp/categories contient des liste de fichiers stockés par catégories.
+
+./tmp/archives contient l'arborescence du répertoire testé avec les fichiers extraits.
+
+Par sécurité, le script ne peut pas être exécuté si ./tmp existe déja car il est automatiquement supprimé à la fin.
+
 ### Détection des fichiers
 
 Le script commence par lister les fichiers dans le répertoire de recherche avec la commande "find". Les chemins des fichiers sont stockés dans ./tmp/fileList
@@ -49,16 +63,22 @@ Le script commence par lister les fichiers dans le répertoire de recherche avec
 ### Détection des fichiers présents dans les archives
 
 Ensuite, on tente d'extraire tous les fichiers avec la commante "tar" en ignorant les messages d'erreur dans le cas des fichiers qui ne sont pas des archives.
+
 L'arborescence du répertoire de recherche est reproduite dans ./tmp/archives mais les fichiers sont tranformés en dossiers
 Les fichiers extraits sont placés dans le dossier correspondant à l'archive extraite.
+
 Pour résumer : une archive ./rep/archive.tar.gz qui contient texte.txt donnera ./tmp/archives/rep/archive.tar.gz/texte.txt
+
 Pour lister les fichier extraits, on refait une dectection des fichiers présents dans ./tmp/archive et on ajoute les chemins à la liste déja existante (./tmp/fileList)
 
 ### Classement des fichiers par catégories
 
 Pour chaque fichiers de ./tmp/fileList, on parcours le fichier d'initialisation en prenant en compte pour chaque ligne le type et la catégorie.
+
 Exemple : 
+
 type = "ASCII Text"
+
 categorie = "texte"
 
 - Si le type du fichier testé est "data", on ajoute son chemin dans le fichier ./tmp/categories/data
@@ -70,11 +90,17 @@ Pour éviter des erreurs liées à la casse, on converti les extensions en majus
 
 **Attention : le script ne teste que les informations renvoyées par "file" qui sont avant la première virgule. Par exemple, pour un fichier HTML, la commande "file" renvoie "HTML Document, ASCII Text" mais le type retenu sera "HTML Document" pour éviter de déctecter les mauvais types comme les fichiers textes qui sont de type "ASCII Text".**
 
+**Le script getFileType.sh permet de donner le type d'un fichier, utilisable dans le fichier d'initialisation (usage : getFileType.sh [ fichier | répertoire | défaut = "./" ]).**
+
 ### Sortie du script
 
 Pour chaque catégories dans ./tmp/catégories, on ititialise les variables plusPetit, plusGrand, totalSize=0 et le tableau mauvaiseExtension=()
 On parcours la liste des fichier contenus dans une catégorie. Pour chaque fichier, on ajoute sa taille à totalSize.
+
 En même temps, on affecte le chemin du fichier à plusPetit si sa taille est plus petite que la taille de plusPetit ou on affecte le chemin du fichier à plusGrand si sa taille est plus grande que la taille de plusGrand, sauf si aucun chemin n'est présent dans plusPetit et plusGrand, dans ce cas les variables sont affectés de force.
+
 Pour chaque fichier, on teste aussi si leur extension correspond au type listé dans le fichier d'initialisation avec les commandes "grep". Pour éviter des erreurs liées à la casse, on converti les extensions en majuscule avant de les tester. Si l'extension ne correspond pas, on ajoute le chemin du fichier au tableau mauvaiseExtension.
+
 Après avoir parcouru la liste des fichiers dans une catégorie, on affiche la taille total (totalSize), le plus petit et plus grand fichier (plusPetit, plusGrand) et leur taille, et les fichiers qui n'ont pas la bonne extension.
+
 Ensuite on passe à la catégorie suivante
